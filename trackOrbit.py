@@ -88,7 +88,9 @@ while True:
     stepsAzimuth = math.floor((iss.az * degrees_per_radian/360)*stepsPerRev*2.875)  
     stepsToTakeAzi= stepsAzimuth - stepsTakenAzi
     stepsTakenAzi = stepsTakenAzi + stepsToTakeAzi
-    if stepsToTakeAzi < 0:
+    
+    
+    if stepsToTakeAzi < 0: # Ja hier gaat het mis (Dit is de goeie branch denk ik)
         stepperAzi.clockwise(5,abs(stepsToTakeAzi))
     else:
         stepperAzi.counterclockwise(5,abs(stepsToTakeAzi))
