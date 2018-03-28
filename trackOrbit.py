@@ -89,7 +89,7 @@ while True:
     stepsToTakeAzi= stepsAzimuth - stepsTakenAzi
     stepsTakenAzi = stepsTakenAzi + stepsToTakeAzi
     
-    if stepsToTakeAzi < 0: #Hier gaat het dus mis
+    if stepsToTakeAzi < 0:
         stepperAzi.clockwise(5,abs(stepsToTakeAzi))
     else:
         stepperAzi.counterclockwise(5,abs(stepsToTakeAzi))
