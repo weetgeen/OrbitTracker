@@ -48,8 +48,8 @@ def clockwise(delay, steps):
  
 #if __name__ == '__main__':
  #   while True:
-  #      delay = input("Time Delay (ms)?")
+  #      delay = input("Time Delay (s/1000000)?")
    #     steps = input("How many steps forward? ")
-    #    forward(int(delay) / 1000.0, int(steps))
+    #    clockwise(int(delay) / 1000.0, int(steps))
      #   steps = input("How many steps backwards? ")
-      #  backwards(int(delay) / 1000.0, int(steps))
+      #  counterclockwise(int(delay) / 1000.0, int(steps))
