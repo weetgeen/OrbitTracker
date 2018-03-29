@@ -91,7 +91,7 @@ while True:
     if stepsTakenAzi == 0:
         stepsTakenAzi = 1472; #resets to inital if north is crossed.
     
-    if stepsToTakeAzi < 0: # Ja hier gaat het mis (Dit is de goeie branch denk ik)
+    if stepsToTakeAzi < 0:
         stepperAzi.clockwise(5,abs(stepsToTakeAzi))
     else:
         stepperAzi.counterclockwise(5,abs(stepsToTakeAzi))
