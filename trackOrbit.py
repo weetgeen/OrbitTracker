@@ -8,14 +8,14 @@ import stepperAlt
 
 from Adafruit_CharLCD import Adafruit_CharLCD
 
-print("deze is gemaakt met sshfs")
+print("deze is gemaakt met sshfs andere branch")
 #Initiate LCD
 lcd = Adafruit_CharLCD(rs = 21,en=20,d4=24,d5=25,d6=12,d7=16,cols=16,lines=2)
 lcd.clear()
 lcd.message('Prep orbital\n Tracking') #\n is new line
 
 #StepperAzi
-stepsTakenAzi = 0
+stepsTakenAzi = 1472
 stepsPerRev = 512
 
 stepsTakenAlt = 0
@@ -88,6 +88,8 @@ while True:
     stepsAzimuth = math.floor((iss.az * degrees_per_radian/360)*stepsPerRev*2.875)  
     stepsToTakeAzi= stepsAzimuth - stepsTakenAzi
     stepsTakenAzi = stepsTakenAzi + stepsToTakeAzi
+    if stepsTakenAzi == 0:
+        stepsTakenAzi = 1472; #resets to inital if north is crossed.
     
     if stepsToTakeAzi < 0:
         stepperAzi.clockwise(5,abs(stepsToTakeAzi))
@@ -99,13 +101,13 @@ while True:
     stepsToTakeAlt = math.floor((augmentedAlt/180)*256 - stepsTakenAlt)  #Altitude percentage times step raange
     stepsTakenAlt = stepsTakenAlt + stepsToTakeAlt
 
-    if stepsToTakeAlt > 0:#Moves stepper altitude
+    if stepsToTakeAlt > 0: 
         stepperAlt.counterclockwise(5,abs(stepsToTakeAlt))
     else:
         stepperAlt.clockwise(5,abs(stepsToTakeAlt))
        
     #Print in Python Shell    
-    print('iss: altitude: %4.1f deg azimuth: %5.1f deg' %(issAlt , issAzi) ,gatech.date,'stepsTakenAzi: %4.1f stepsToTakeAzi: %4.1F ' %(stepsTakenAzi,stepsToTakeAzi) ,'stepsTakenAlt:  %4.1f   stepsToTakeAlt: %5.1f' %(stepsTakenAlt,stepsToTakeAlt)) 
+    print('iss: altitude: %4.1f deg azimuth: %5.1f deg' %(issAlt , issAzi) ,gatech.date,'stepsAzimuth: %4.1f stepsToTakeAzi: %4.1F ' %(stepsAzimuth,stepsToTakeAzi) ,'stepsTakenAzi: %4.1f stepsToTakeAzi: %4.1F ' %(stepsTakenAzi,stepsToTakeAzi) ,'stepsTakenAlt:  %4.1f   stepsToTakeAlt: %5.1f' %(stepsTakenAlt,stepsToTakeAlt)) 
 
     #Print on LCD Screen
     lcd.clear()
