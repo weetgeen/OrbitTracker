@@ -5,42 +5,56 @@ import math
 import time
 import stepperAzi
 import stepperAlt
+import shelve
+
+
+def north(stepsTakenAzi,stepsTakenAlt):
+    
+    stepsToTakeAzi= 1472 - stepsTakenAzi
+    if stepsToTakeAzi < 0:
+        stepperAzi.clockwise(5,abs(stepsToTakeAzi))
+    else:
+        stepperAzi.counterclockwise(5,abs(stepsToTakeAzi))
+        
+    
+    stepsToTakeAlt = 128 - stepsTakenAlt
+    if stepsToTakeAlt > 0: 
+        stepperAlt.counterclockwise(5,abs(stepsToTakeAlt))
+    else:
+        stepperAlt.clockwise(5,abs(stepsToTakeAlt))
+        
+
+
 
 from Adafruit_CharLCD import Adafruit_CharLCD
-
-print("deze is gemaakt met sshfs andere branch")
 #Initiate LCD
 lcd = Adafruit_CharLCD(rs = 21,en=20,d4=24,d5=25,d6=12,d7=16,cols=16,lines=2)
 lcd.clear()
 lcd.message('Prep orbital\n Tracking') #\n is new line
 
+
 #StepperAzi
-stepsTakenAzi = 1472
 stepsPerRev = 512
 
-stepsTakenAlt = 0
-
-
-#Stepper Freedom of motion checks
-lcd.clear()
-lcd.message('Initialize Alt\n Stepper') #\n is new line
-#Stepper
+#Checking Shelve for previous position, then return to true north first. If there is non assume true North already taken
+shelfDirection = shelve.open('Direction')
+try:
+    stepsTakenAzi = shelfDirection['Azi']
+    stepsTakenAlt = shelfDirection['Alt']
+    #Bring bot axis to true north
+    lcd.clear()
+    lcd.message('Initialize to\n True North')
+    north(stepsTakenAzi,stepsTakenAlt)
+except KeyError:
+    print("No previous direction value given assume start from true North")
+    lcd.clear()
+    lcd.message('Assumed True North as Start')
+    
+stepsTakenAzi = 1472 #Either north was assumed or the pointer is set to noth by north()
 stepsTakenAlt = 128
-stepsToTakeAlt = 128
-stepsTakenAlt = 256 
-if stepsToTakeAlt > 0:
-    stepperAlt.counterclockwise(5,abs(stepsToTakeAlt))
-else:
-    stepperAlt.clockwise(5,abs(stepsToTakeAlt))
 
-stepsToTakeAlt = -128
-stepsTakenAlt = 128
-if stepsToTakeAlt > 0:
-    stepperAlt.counterclockwise(5,abs(stepsToTakeAlt))
-else:
-    stepperAlt.clockwise(5,abs(stepsToTakeAlt))
 
-     
+
 lcd.clear()
 lcd.message('Prep orbital\n Tracking')
 
@@ -84,7 +98,7 @@ while True:
     issAzi = round(iss.az * degrees_per_radian,2)
     issAlt = round(iss.alt * degrees_per_radian,2)
     
-    #Stepper
+    #StepperAzi
     stepsAzimuth = math.floor((iss.az * degrees_per_radian/360)*stepsPerRev*2.875)  
     stepsToTakeAzi= stepsAzimuth - stepsTakenAzi
     stepsTakenAzi = stepsTakenAzi + stepsToTakeAzi
@@ -115,10 +129,9 @@ while True:
     lcd.message(lcdstring)
     #lcd.message('ISS (Zarya)\n Azi{}'.format(issAzi).'Alt{}'.format(issAlt))
 
-
+    #Write to Shelve
+    shelfDirection['Alt'] = stepsTakenAlt
+    shelfDirection['Azi'] = stepsTakenAzi
 
 
     time.sleep(1.0)
-
-
-    
