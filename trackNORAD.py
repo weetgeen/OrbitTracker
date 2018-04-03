@@ -6,7 +6,7 @@ import time
 import stepperAzi
 import stepperAlt
 import shelve
-
+import bs4
 
 def north(stepsTakenAzi,stepsTakenAlt):
     
@@ -24,12 +24,10 @@ def north(stepsTakenAzi,stepsTakenAlt):
         stepperAlt.clockwise(5,abs(stepsToTakeAlt))
         
 
-
 from Adafruit_CharLCD import Adafruit_CharLCD
 #Initiate LCD
 lcd = Adafruit_CharLCD(rs = 21,en=20,d4=24,d5=25,d6=12,d7=16,cols=16,lines=2)
-lcd.clear()
-lcd.message('Prep orbital\n Tracking') #\n is new line
+
 
 
 #StepperAzi
@@ -52,6 +50,13 @@ except KeyError:
     lcd.message('Assumed True North as Start')
    
 
+lcd.clear()
+lcd.message('Please give NORAD')
+print('NORAD:')
+
+NORAD = input()
+print('Searching for: %s' % (NORAD))
+
 shelfDirection.close()
 
 stepsTakenAzi = 1472 #Either north was assumed or the pointer is set to noth by north()
@@ -72,12 +77,13 @@ lon = j['longitude']
 
 
 #Get most recent TLE from: https://www.celestrak.com/NORAD/elements/stations.txt
-celestrack = requests.get("https://celestrak.com/NORAD/elements/stations.txt")
-trackedBody = celestrack.text.splitlines()[0]
-TLE1 = celestrack.text.splitlines()[1]
-TLE2 = celestrack.text.splitlines()[2]
-iss = ephem.readtle(trackedBody, TLE1,TLE2)
+celestrack = requests.get("https://www.celestrak.com/cgi-bin/TLE.pl?CATNR=%s" % (NORAD))
+trackedBody = celestrack.text.splitlines()[13]
+TLE1 = celestrack.text.splitlines()[14]
+TLE2 = celestrack.text.splitlines()[15]
+NORAD = ephem.readtle(trackedBody, TLE1,TLE2)
 
+print('Found: %s' % (trackedBody))
 
 
 gatech = ephem.Observer()
@@ -97,13 +103,13 @@ while True:
     gatech.lon, gatech.lat = lon/degrees_per_radian, lat/degrees_per_radian #Set gps coordinates for observer in radian
     gatech.elevation = 5 # elevation of observer
     
-    iss.compute(gatech) #All angles returned are in radians!
+    NORAD.compute(gatech) #All angles returned are in radians!
     
-    issAzi = round(iss.az * degrees_per_radian,2)
-    issAlt = round(iss.alt * degrees_per_radian,2)
+    NORADAzi = round(NORAD.az * degrees_per_radian,2)
+    NORADAlt = round(NORAD.alt * degrees_per_radian,2)
     
     #StepperAzi
-    stepsAzimuth = math.floor((iss.az * degrees_per_radian/360)*stepsPerRev*2.875)  
+    stepsAzimuth = math.floor((NORAD.az * degrees_per_radian/360)*stepsPerRev*2.875)  
     stepsToTakeAzi= stepsAzimuth - stepsTakenAzi
     stepsTakenAzi = stepsTakenAzi + stepsToTakeAzi
     if stepsTakenAzi == 0:
@@ -114,7 +120,7 @@ while True:
     else:
         stepperAzi.counterclockwise(5,abs(stepsToTakeAzi))
        
-    augmentedAlt = issAlt+90  #Makes sure you don't have to work with negatives
+    augmentedAlt = NORADAlt+90  #Makes sure you don't have to work with negatives
 
     stepsToTakeAlt = math.floor((augmentedAlt/180)*256 - stepsTakenAlt)  #Altitude percentage times step raange
     stepsTakenAlt = stepsTakenAlt + stepsToTakeAlt
@@ -125,13 +131,13 @@ while True:
         stepperAlt.clockwise(5,abs(stepsToTakeAlt))
        
     #Print in Python Shell    
-    print('%s: altitude: %4.1f deg azimuth: %5.1f deg' %(trackedBody, issAlt , issAzi) ,gatech.date)
+    print('%s: altitude: %4.1f deg azimuth: %5.1f deg' %(trackedBody, NORADAlt , NORADAzi) ,gatech.date)
 
     #Print on LCD Screen
     lcd.clear()
-    lcdstring = trackedBody + '\nAzi:%0.0f'  % (issAlt) + '  Alt:%0.0f' % (issAzi)
+    lcdstring = trackedBody + '\nAzi:%0.0f'  % (NORADAzi) + '  Alt:%0.0f' % (NORADAlt)
     lcd.message(lcdstring)
-    #lcd.message('ISS (Zarya)\n Azi{}'.format(issAzi).'Alt{}'.format(issAlt))
+    #lcd.message('NORAD (Zarya)\n Azi{}'.format(NORADAzi).'Alt{}'.format(NORADAlt))
 
     #Write to Shelve
     shelfDirection = shelve.open('Direction')
