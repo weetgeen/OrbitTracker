@@ -44,12 +44,17 @@ try:
     #Bring bot axis to true north
     lcd.clear()
     lcd.message('Initialize to\n True North')
+    print("Redirect to true north")
     north(stepsTakenAzi,stepsTakenAlt)
+    shelfDirection.close()
 except KeyError:
     print("No previous direction value given assume start from true North")
     lcd.clear()
     lcd.message('Assumed True North as Start')
-    
+   
+
+shelfDirection.close()
+
 stepsTakenAzi = 1472 #Either north was assumed or the pointer is set to noth by north()
 stepsTakenAlt = 128
 
@@ -88,7 +93,7 @@ print('latitude:',lat,' longitude:',lon) # prints the lattitude and longitude of
 #lcd.message(lcdstring)
 
 while True:
-
+    
     gatech = ephem.Observer()
     gatech.lon, gatech.lat = lon/degrees_per_radian, lat/degrees_per_radian #Set gps coordinates for observer in radian
     gatech.elevation = 5 # elevation of observer
@@ -130,8 +135,9 @@ while True:
     #lcd.message('ISS (Zarya)\n Azi{}'.format(issAzi).'Alt{}'.format(issAlt))
 
     #Write to Shelve
+    shelfDirection = shelve.open('Direction')
     shelfDirection['Alt'] = stepsTakenAlt
     shelfDirection['Azi'] = stepsTakenAzi
-
+    shelfDirection.close()
 
     time.sleep(1.0)
