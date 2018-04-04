@@ -23,7 +23,9 @@ def north(stepsTakenAzi,stepsTakenAlt):
     else:
         stepperAlt.clockwise(5,abs(stepsToTakeAlt))
         
-
+    shelfDirection['Alt'] = 90
+    shelfDirection['Azi'] = 0
+    shelfDirection.close()
 
 from Adafruit_CharLCD import Adafruit_CharLCD
 #Initiate LCD
