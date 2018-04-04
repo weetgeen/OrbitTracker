@@ -129,7 +129,7 @@ while True:
 
     #Print on LCD Screen
     lcd.clear()
-    lcdstring = trackedBody + '\nAzi:%0.0f'  % (issAlt) + '  Alt:%0.0f' % (issAzi)
+    lcdstring = trackedBody + '\nAzi:%0.0f'  % (issAzi) + '  Alt:%0.0f' % (issAlt)
     lcd.message(lcdstring)
     #lcd.message('ISS (Zarya)\n Azi{}'.format(issAzi).'Alt{}'.format(issAlt))
 
